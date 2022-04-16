@@ -1,7 +1,5 @@
 package ru.passport.service;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,8 +8,6 @@ import ru.passport.model.Passport;
 
 @Component
 public class MailService {
-
-    private final Gson gson = new GsonBuilder().create();
 
     @Autowired
     private KafkaTemplate<Integer, String> template;
@@ -22,11 +18,11 @@ public class MailService {
         this.passportService = passportService;
     }
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 30000)
     public void scheduleTask() {
-        Iterable<Passport> expiredPassports = passportService.findAllByValidSoon();
-        for (Passport passport : expiredPassports) {
-            template.send("expiredPassport", gson.toJson(passport));
+        Iterable<Passport> passports = passportService.findAllNotValidDate();
+        for (Passport passport : passports) {
+            template.send("expiredPassport", passport.toString());
         }
     }
 }
